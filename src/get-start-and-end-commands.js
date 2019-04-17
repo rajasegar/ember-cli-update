@@ -79,7 +79,7 @@ function createProjectFromRemote(command) {
   }) {
     return co.wrap(function* createProject(cwd) {
       let npxCommand;
-      if (options.blueprint) {
+      if (options.blueprint.name !== 'default-blueprint') {
         let blueprintName = options.blueprint.name;
         let blueprintLocation = options.blueprint.location;
 

@@ -294,35 +294,6 @@ applicable codemods: ember-modules-codemod, ember-qunit-codemod, ember-test-help
     });
   });
 
-  it('can use a local blueprint', function() {
-    this.timeout(3 * 60 * 1000);
-
-    return merge({
-      fixturesPath: 'test/fixtures/local-blueprint-app/local',
-      commitMessage: 'my-app',
-      to: '0.0.2',
-      beforeMerge: co.wrap(function*() {
-        let blueprintPath = yield buildTmp({
-          fixturesPath: 'test/fixtures/local-blueprint'
-        });
-
-        let newBlueprintPath = path.resolve(tmpPath, '../local-blueprint');
-
-        yield fs.remove(newBlueprintPath);
-
-        yield fs.move(blueprintPath, newBlueprintPath);
-      })
-    }).then(({
-      status
-    }) => {
-      fixtureCompare({
-        mergeFixtures: 'test/fixtures/local-blueprint-app/merge/my-app'
-      });
-
-      assertNoUnstaged(status);
-    });
-  });
-
   it('can use a remote blueprint', function() {
     this.timeout(3 * 60 * 1000);
 

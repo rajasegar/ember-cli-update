@@ -39,7 +39,8 @@ describe(_getStartAndEndCommands, function() {
       packageJson: { name: projectName },
       projectOptions: ['app'],
       startVersion,
-      endVersion
+      endVersion,
+      blueprint: { name: 'default-blueprint' }
     }, options));
   }
 
@@ -57,7 +58,7 @@ describe(_getStartAndEndCommands, function() {
       projectOptions: ['app'],
       packageName,
       commandName,
-      blueprint: undefined,
+      blueprint: { name: 'default-blueprint' },
       startOptions: {
         packageVersion: startVersion
       },
@@ -101,7 +102,8 @@ describe(_getStartAndEndCommands, function() {
     let createProject = createProjectFromRemote({
       options: {
         projectName,
-        packageVersion
+        packageVersion,
+        blueprint: { name: 'default-blueprint' }
       }
     });
 

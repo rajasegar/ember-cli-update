@@ -26,18 +26,21 @@ describe(function() {
 
   let merge = co.wrap(function* merge({
     fixturesPath,
+    to = '3.2.0-beta.1',
     runCodemods,
     subDir = '',
-    commitMessage
+    commitMessage,
+    beforeMerge = () => Promise.resolve()
   }) {
     tmpPath = yield buildTmp({
       fixturesPath,
       subDir
     });
 
+    yield beforeMerge();
+
     let args = [
-      '--to',
-      '3.2.0-beta.1',
+      `--to=${to}`,
       '--resolve-conflicts'
     ];
     if (runCodemods) {
@@ -153,6 +156,49 @@ describe(function() {
     });
 
     assertNormalUpdate(status);
+    assertNoUnstaged(status);
+  }));
+
+  it('can pick from multiple blueprint', co.wrap(function*() {
+    this.timeout(3 * 60 * 1000);
+
+    let {
+      ps,
+      promise
+    } = yield merge({
+      fixturesPath: 'test/fixtures/local-blueprint-app/local',
+      commitMessage: 'my-app',
+      to: '0.0.2',
+      beforeMerge: co.wrap(function*() {
+        let blueprintPath = yield buildTmp({
+          fixturesPath: 'test/fixtures/local-blueprint'
+        });
+
+        let newBlueprintPath = path.resolve(tmpPath, '../local-blueprint');
+
+        yield fs.remove(newBlueprintPath);
+
+        yield fs.move(blueprintPath, newBlueprintPath);
+      })
+    });
+
+    ps.stdout.on('data', data => {
+      let str = data.toString();
+      if (str.includes('Multiple blueprint updates have been found.')) {
+        ps.stdin.write('\n');
+      }
+    });
+
+    let {
+      status
+    } = yield promise;
+
+    fixtureCompare({
+      mergeFixtures: 'test/fixtures/local-blueprint-app/merge/my-app'
+    });
+
+    expect(status).to.match(/^M {2}.*ember-cli-update\.json$/m);
+
     assertNoUnstaged(status);
   }));
 });

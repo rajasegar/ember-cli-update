@@ -31,7 +31,7 @@ module.exports = co.wrap(function* getProjectOptions({
   dependencies,
   devDependencies
 }, blueprint) {
-  if (blueprint) {
+  if (blueprint.name !== 'default-blueprint') {
     return ['blueprint'];
   }
 

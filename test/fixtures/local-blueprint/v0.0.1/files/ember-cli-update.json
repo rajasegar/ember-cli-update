@@ -3,7 +3,8 @@
     {
       "name": "ember-cli-update-git-blueprint-test",
       "location": "../local-blueprint",
-      "version": "<%= blueprintVersion %>"
+      "version": "<%= blueprintVersion %>",
+      "isPartial": false
     }
   ]
 }

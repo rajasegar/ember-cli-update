@@ -12,6 +12,7 @@ const _getTagVersion = require('./get-tag-version');
 const getRemoteUrl = require('./get-remote-url');
 const boilerplateUpdate = require('boilerplate-update');
 const getStartAndEndCommands = require('./get-start-and-end-commands');
+const inquirer = require('inquirer');
 
 module.exports = co.wrap(function* emberCliUpdate({
   from,
@@ -25,17 +26,48 @@ module.exports = co.wrap(function* emberCliUpdate({
   createCustomDiff,
   wasRunAsExecutable
 }) {
-  let blueprint;
+  let emberCliUpdateJson;
   try {
-    let emberCliUpdateJson = yield fs.readJson('ember-cli-update.json');
-    if (emberCliUpdateJson) {
-      blueprint = emberCliUpdateJson.blueprints[0];
-    }
+    emberCliUpdateJson = yield fs.readJson('ember-cli-update.json');
   } catch (err) {
     // do nothing
   }
 
-  if (blueprint) {
+  let ignoredFiles = [];
+
+  let blueprints;
+  if (emberCliUpdateJson) {
+    ignoredFiles.push('ember-cli-update.json');
+
+    blueprints = emberCliUpdateJson.blueprints;
+  } else {
+    blueprints = [];
+  }
+
+  let defaultBlueprint = {
+    name: 'default-blueprint'
+  };
+
+  let completeBlueprints = blueprints.filter(blueprint => !blueprint.isPartial);
+  if (!completeBlueprints.length) {
+    blueprints.splice(0, 0, defaultBlueprint);
+  }
+
+  let blueprint;
+  if (blueprints.length > 1) {
+    let answers = yield inquirer.prompt([{
+      type: 'list',
+      message: 'Multiple blueprint updates have been found. Which would you like to update?',
+      name: 'blueprint',
+      choices: blueprints.map(blueprint => blueprint.name)
+    }]);
+
+    blueprint = blueprints.find(blueprint => blueprint.name === answers.blueprint);
+  } else {
+    blueprint = blueprints[0];
+  }
+
+  if (blueprint !== defaultBlueprint) {
     createCustomDiff = true;
   }
 
@@ -52,7 +84,7 @@ module.exports = co.wrap(function* emberCliUpdate({
       let versions;
       let blueprintLocation;
 
-      if (blueprint) {
+      if (blueprint !== defaultBlueprint) {
         packageName = blueprint.name;
         blueprintLocation = blueprint.location;
         packageVersion = blueprint.version;
@@ -70,7 +102,7 @@ module.exports = co.wrap(function* emberCliUpdate({
       let startVersion;
       if (from) {
         startVersion = yield getTagVersion(from);
-      } else if (blueprint) {
+      } else if (blueprint !== defaultBlueprint) {
         startVersion = packageVersion;
       } else {
         startVersion = getProjectVersion(packageVersion, versions, projectOptions);
@@ -104,12 +136,14 @@ module.exports = co.wrap(function* emberCliUpdate({
     runCodemods,
     codemodsUrl: 'https://raw.githubusercontent.com/ember-cli/ember-cli-update-codemods-manifest/v3/manifest.json',
     createCustomDiff,
+    ignoredFiles,
     wasRunAsExecutable
   })).promise;
 
-  if (blueprint) {
-    let emberCliUpdateJson = yield fs.readJson('ember-cli-update.json');
-    blueprint = emberCliUpdateJson.blueprints[0];
+  if (blueprint !== defaultBlueprint) {
+    emberCliUpdateJson = yield fs.readJson('ember-cli-update.json');
+    blueprints = emberCliUpdateJson.blueprints;
+    blueprint = blueprints.find(b => b.name === blueprint.name);
 
     if (blueprint.version !== endVersion) {
       blueprint.version = endVersion;

@@ -1,6 +1,5 @@
 'use strict';
 
-const co = require('co');
 const utils = require('./utils');
 const getProjectOptions = require('./get-project-options');
 const getPackageName = require('./get-package-name');
@@ -11,7 +10,7 @@ const getRemoteUrl = require('./get-remote-url');
 const boilerplateUpdate = require('boilerplate-update');
 const getStartAndEndCommands = require('./get-start-and-end-commands');
 
-module.exports = co.wrap(function* emberCliUpdate({
+module.exports = async function emberCliUpdate({
   from,
   to,
   resolveConflicts,
@@ -23,31 +22,31 @@ module.exports = co.wrap(function* emberCliUpdate({
   createCustomDiff,
   wasRunAsExecutable
 }) {
-  return yield (yield boilerplateUpdate({
+  return await (await boilerplateUpdate({
     projectOptions: ({ packageJson }) => getProjectOptions(packageJson),
-    mergeOptions: co.wrap(function* mergeOptions({
+    mergeOptions: async function mergeOptions({
       packageJson,
       projectOptions
     }) {
       let packageName = getPackageName(projectOptions);
       let packageVersion = getPackageVersion(packageJson, packageName);
-      let versions = yield utils.getVersions(packageName);
+      let versions = await utils.getVersions(packageName);
       let getTagVersion = _getTagVersion(versions, packageName);
 
       let startVersion;
       if (from) {
-        startVersion = yield getTagVersion(from);
+        startVersion = await getTagVersion(from);
       } else {
         startVersion = getProjectVersion(packageVersion, versions, projectOptions);
       }
 
-      let endVersion = yield getTagVersion(to);
+      let endVersion = await getTagVersion(to);
 
       return {
         startVersion,
         endVersion
       };
-    }),
+    },
     remoteUrl: ({ projectOptions }) => getRemoteUrl(projectOptions),
     compareOnly,
     resolveConflicts,
@@ -60,4 +59,4 @@ module.exports = co.wrap(function* emberCliUpdate({
     customDiffOptions: getStartAndEndCommands,
     wasRunAsExecutable
   })).promise;
-});
+};

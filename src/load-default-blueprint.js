@@ -7,6 +7,13 @@ const {
   defaultAddonBlueprintName
 } = require('./constants');
 
+/**
+ * Generate a default blueprint with the given project options and version
+ *
+ * @param {array} projectOptions
+ * @param {string} version
+ * @returns {object}
+ */
 function loadDefaultBlueprint(projectOptions = [], version) {
   let name = defaultAppBlueprintName;
   if (projectOptions.includes('addon')) {

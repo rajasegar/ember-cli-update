@@ -7,6 +7,12 @@ const getTagVersion = require('boilerplate-update/src/get-tag-version');
 
 const toDefault = require('./args').to.default;
 
+/**
+ * Check if the blueprint needs to be updated or not.
+ *
+ * @param {object}
+ * @returns {object} with a boolean flag `isUpToDate`
+ */
 async function checkForBlueprintUpdates({
   cwd,
   blueprints

@@ -2,6 +2,12 @@
 
 const loadBlueprintFile = require('./load-blueprint-file');
 
+/**
+ * Load the safe blueprint file from current working directory.
+ * If there is not one,construct it on the fly
+ *
+ * @param {string} cwd
+ */
 async function loadSafeBlueprintFile(cwd) {
   let emberCliUpdateJson = await loadBlueprintFile(cwd);
 

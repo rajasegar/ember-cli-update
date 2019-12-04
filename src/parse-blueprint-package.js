@@ -20,6 +20,14 @@ function isSubDir(base, test) {
   return !relative.startsWith('..') && !path.isAbsolute(relative);
 }
 
+/**
+ * Parse the blueprint package and returns an object
+ * containing name, location and url.
+ *
+ * @param {string} cwd
+ * @param {string} blueprint
+ * @returns {object}
+ */
 async function parseBlueprintPackage({
   cwd = '.',
   blueprint

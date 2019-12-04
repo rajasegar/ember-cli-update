@@ -53,12 +53,14 @@ module.exports = async function emberCliUpdate({
 }) {
   let cwd = process.cwd();
 
+  // Generate or load blueprint file
   let emberCliUpdateJson = await loadSafeBlueprintFile(cwd);
 
   let blueprint;
   let packageUrl;
   let isPersistedBlueprint;
 
+  // Parse the blueprint file
   if (_blueprint) {
     let parsedPackage = await parseBlueprintPackage({
       cwd,
@@ -67,6 +69,8 @@ module.exports = async function emberCliUpdate({
     packageUrl = parsedPackage.url;
 
     let packageName = parsedPackage.name;
+
+    // Install the package
     if (!packageName) {
       let downloadedPackage = await downloadPackage(null, packageUrl, toDefault);
       packageName = downloadedPackage.name;

@@ -6,6 +6,15 @@ const tmpDir = promisify(require('tmp').dir);
 const npa = require('npm-package-arg');
 const run = require('./run');
 
+/**
+ * Install the given package url using npm and
+ * return an object containing name, path and version
+ *
+ * @param {string} name
+ * @param {string} url
+ * @param {string} range
+ * @returns {object}
+ */
 async function downloadPackage(name, url, range) {
   if (!range) {
     throw new Error('Missing a range when downloading blueprint');
